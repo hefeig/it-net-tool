@@ -1,0 +1,29 @@
+Value HOSTNAME (\S+)
+Value MODEL (\S+)
+Value List LOCALPORT ([A-Za-z\-]+\s*\d\/\d(\/\d*)*)
+Value List UPPORT (([A-Za-z\-]+\s*\d\/\d(\/\d*)*|\w+))
+Value List UPDEVICE (\S+(LF|CO|SP|DI|EX)\S+\b)
+Value VERSION (Version.*Release.*)
+Value List SN ([A-Za-z\d]+)
+
+Start
+ ^.*<${HOSTNAME}>.* -> Continue
+ ^.*disp lldp nei list -> lldp
+
+
+lldp
+ ^${LOCALPORT}\s+\S+\s+${UPPORT}\s+${UPDEVICE} -> Continue
+ ^${UPDEVICE}\s*${LOCALPORT}\s+\S*\s*${UPPORT} -> Continue
+ ^.*display version -> version
+
+version
+ ^.*Comware Software.*${VERSION}
+ ^H3C\s${MODEL}\suptime is.*
+ ^.*display device ma -> device
+
+device
+ ^\sSlot \d CPU \d: -> sn
+ ^Slot \d: -> sn
+
+sn
+ ^DEVICE_SERIAL_NUMBER\s*:\s*${SN} -> device
