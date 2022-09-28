@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*- 
-# @Time : 2022/8/25 11:37 
 # @Author : HEFEI
-# @File : 3jia.py
 import os
 from textfsm import parser, TextFSM
 import time
@@ -102,9 +100,9 @@ def h3c_tm(ip, text_output, dev):
     # 转换SN
     SN = ''
     for s in data['SN']:
-        S1 = f'{s}\n'
+        S1 = f'{s},'
         SN += S1
-    SN = SN.strip('\n')
+    SN = SN.rstrip(',')
     # 优化LF、DI、CO、SP
     sheet.append([data['HOSTNAME'],
                   ip,
@@ -220,8 +218,10 @@ class ssh_method(threading.Thread):
             logger.error('{} 型号不匹配导致配置错误'.format(self.ip), conf_e)
         # except exceptions.ReadTimeout:
         #     print(f'{self.ip}读回显超时')
-        except ValueError:
+        except ValueError as v:
             # print(f'设备 {self.ip} 模板 {self.devicety} textfsm模板错误，请检查模板。')
+            if 'Router prompt not found' in v:
+                logger.error(f'设备 {self.ip} 设备厂商不匹配！', exc_info=True)
             logger.error(f'设备 {self.ip} {str(ValueError)}', exc_info=True)
             # logger.debug(f'设备 {self.ip} 模板 {self.devicety} textfsm模板错误，请检查模板。也有可能账户被锁定', exc_info=True)
             # logger.error(f'设备 {self.ip} 模板 {self.devicety} textfsm模板错误，请检查模板。')
