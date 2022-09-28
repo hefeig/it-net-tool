@@ -104,16 +104,21 @@ def h3c_tm(ip, text_output, dev):
         SN += S1
     SN = SN.rstrip(',')
     # 优化LF、DI、CO、SP
-    sheet.append([data['HOSTNAME'],
+    htname = data['HOSTNAME'].lower()
+    mod = data['MODEL']
+    ver = data['VERSION']
+    room = htname[9:15].lower()
+    site = data['HOSTNAME'][3:8]
+    sheet.append([htname,
                   ip,
-                  data['MODEL'],
+                  mod,
                   'sw',
                   SN,
-                  data['VERSION'],
+                  ver,
                   'cop.xiaomi_owt.it',
+                  room,
                   '',
-                  '',
-                  '',
+                  site,
                   'working',
                   '',
                   UP_PORT
@@ -219,7 +224,7 @@ class ssh_method(threading.Thread):
         # except exceptions.ReadTimeout:
         #     print(f'{self.ip}读回显超时')
         except ValueError as v:
-            # print(f'设备 {self.ip} 模板 {self.devicety} textfsm模板错误，请检查模板。')
+            # # print(f'设备 {self.ip} 模板 {self.devicety} textfsm模板错误，请检查模板。')
             # if 'Router prompt not found' in v:
             #     logger.error(f'设备 {self.ip} 设备厂商不匹配！', exc_info=True)
             logger.error(f'设备 {self.ip} {str(ValueError)}', exc_info=True)
