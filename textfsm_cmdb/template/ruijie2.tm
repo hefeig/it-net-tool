@@ -11,8 +11,8 @@ Start
  ^${HOSTNAME}#.*
  ^System description.*\(${MODEL}\)
  ^System software version : ${VERSION}
- ^  Slot \d\/\w\d.* -> m1
- ^  Slot (1\/0|\d)\s*:\s* -> he
+ ^  Slot \d\/M\d.* -> m1
+ ^  Slot ([1,2]\/0|\d)\s*:\s* -> he
 
 he
  ^\s+Serial number\s+:\s+${SN} -> Continue
@@ -22,7 +22,7 @@ m1
  ^\s+Serial number\s+:\s+${SN} -> m2
 
 m2
- ^  Slot 1/M2.* -> m3
+ ^  Slot 1/M\d.* -> m3
 
 m3
  ^\s+Serial number\s+:\s+${SN} -> lldp

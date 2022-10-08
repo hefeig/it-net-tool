@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*- 
+# @Time : 2022/8/25 11:37 
 # @Author : HEFEI
+# @File : 3jia.py
 import os
 from textfsm import parser, TextFSM
 import time
@@ -36,8 +38,8 @@ def INIT_CMDB(log1):
     sheet = workbook.create_sheet('主机（NET）')
     # cells=sheet[sheet.dimensions]
     sheet.append([
-        'htname',
-        'ip',
+        'hostname',
+        'bip',
         'model',
         'type',
         'sn',
@@ -48,7 +50,8 @@ def INIT_CMDB(log1):
         'site',
         'state',
         'U位',
-        '上联接口'
+        '上联接口',
+        'supplier'
     ])
     workbook.save('CMDB.xlsx')
     logger.debug('创建了一个新的CMDB.xlsx文件')
@@ -57,10 +60,13 @@ def INIT_CMDB(log1):
 def h3c_tm(ip, text_output, dev):
     if dev == 'hp_comware':
         tm = 'template/H3C_CMDB.template'
+        prefix = 'H3C_'
     elif dev == 'ruijie_os':
         tm = 'template/ruijie2.tm'
+        prefix = 'Ruijie_'
     elif dev == 'huawei':
         tm = 'template/huawei.tm'
+        prefix = 'HUAWEI_'
     with open(tm) as template:
         fsm = TextFSM(template)
         result = fsm.ParseTextToDicts(text_output)
@@ -100,16 +106,16 @@ def h3c_tm(ip, text_output, dev):
     # 转换SN
     SN = ''
     for s in data['SN']:
-        S1 = f'{s},'
+        S1 = f'{s}_'
         SN += S1
-    SN = SN.rstrip(',')
+    SN = SN.rstrip('_')
     # 优化LF、DI、CO、SP
     htname = data['HOSTNAME'].lower()
-    mod = data['MODEL']
+    mod = prefix + data['MODEL']
     ver = data['VERSION']
-    room = htname[9:15].lower()
+    room = htname[9:14].upper()
     site = data['HOSTNAME'][3:8]
-    sheet.append([htname,
+    sheet.append([f"{htname}.it",
                   ip,
                   mod,
                   'sw',
@@ -121,7 +127,8 @@ def h3c_tm(ip, text_output, dev):
                   site,
                   'working',
                   '',
-                  UP_PORT
+                  UP_PORT,
+                  'it'
                   ])
     workbook.save('CMDB.xlsx')
     logger.debug(f"{ip} {data['HOSTNAME']}录入完成")
@@ -311,6 +318,7 @@ if __name__ == '__main__':
     username = input('请输入用户名:')
     logger.debug(f'操作用户:{username}')
     passwd = getpass.getpass('请输入密码:')
+    print('正在生成CMDB...')
     # 打开excel表
     workbook = load_workbook('CMDB.xlsx')
     sheet = workbook['主机（NET）']
@@ -326,6 +334,7 @@ if __name__ == '__main__':
     else:
         mini = round(cost_time / 60)
         sec = cost_time % 60
+        print('生成完毕.')
         print('总共花费：{0} 分 {1} 秒'.format(mini, sec))
         logger.debug('总共花费：{0} 分 {1} 秒'.format(mini, sec))
     print('*' * 50)
